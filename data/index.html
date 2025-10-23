@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartSmoker</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --accent: #3498db;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #212529;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .network-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;
+      background: var(--accent); color: white;
+    }
+    .status-card {
+      background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .sensors-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0;
+    }
+    .sensor { background: #f1f3f5; padding: 10px; border-radius: 8px; text-align: center; }
+    .programs-title { font-size: 18px; margin: 20px 0 12px; font-weight: 600; }
+    .program-card {
+      background: var(--card); border-radius: 10px; padding: 14px; margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;
+    }
+    .program-card button {
+      background: var(--accent); color: white; border: none; padding: 6px 12px;
+      border-radius: 6px; cursor: pointer; font-weight: 600;
+    }
+    .nav-icons {
+      display: flex; justify-content: space-around; margin-top: 24px;
+    }
+    .nav-icon {
+      display: flex; flex-direction: column; align-items: center; text-decoration: none;
+      color: var(--text); font-size: 12px;
+    }
+    .nav-icon img { width: 48px; height: 48px; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Умная коптильня</h1>
+    <!-- Сетевой статус (динамически обновляется) -->
+    <div id="networkStatus" class="network-badge">📡 Режим точки доступа</div>
+  </div>
+
+  <div class="status-card">
+    <div><strong>Состояние:</strong> <span id="systemStatus">Ожидание запуска программы</span></div>
+
+    <div class="sensors-grid">
+      <div class="sensor">Камера: <strong id="tempChamber">--</strong>°C</div>
+      <div class="sensor">Дым: <strong id="tempSmoke">--</strong>°C</div>
+      <div class="sensor">Продукт: <strong id="tempProduct">--</strong>°C</div>
+      <div class="sensor">Влажность: <strong id="humidity">--</strong>%</div>
+    </div>
+
+    <div>ТЭН: <span id="heaterStatus">Выкл</span> | Дым: <span id="smokeStatus">0%</span></div>
+  </div>
+
+  <div class="programs-title">Доступные программы</div>
+  <div id="programsList">
+    <!-- Программы будут загружены через API -->
+  </div>
+
+  <div class="nav-icons">
+    <a href="/wifi" class="nav-icon">
+      <img src="/wifi-icon.png" alt="Wi-Fi">
+      Сеть
+    </a>
+    <a href="/programs" class="nav-icon">
+      <img src="/program-icon.png" alt="Программы">
+      Программы
+    </a>
+  </div>
+
+  <script>
+    async function fetchState() {
+      try {
+        const res = await fetch('/api/state');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Сеть
+        const netBadge = document.getElementById('networkStatus');
+        if (data.networkMode === 'STA') {
+          netBadge.innerHTML = `📶 ${data.ssid} (${data.ip})`;
+          netBadge.style.background = '#27ae60';
+        } else {
+          netBadge.innerHTML = `📡 ${data.ssid}`;
+          netBadge.style.background = '#2980b9';
+        }
+
+        // Состояние
+        const status = document.getElementById('systemStatus');
+        if (data.mode === 'RUNNING') {
+          status.textContent = `Выполняется: ${data.currentProgramName} — Этап ${data.currentStepIndex + 1} (осталось ${data.stepTimeLeft})`;
+        } else {
+          status.textContent = 'Ожидание запуска программы';
+        }
+
+        // Датчики
+        document.getElementById('tempChamber').textContent = data.tempChamber.toFixed(1);
+        document.getElementById('tempSmoke').textContent = data.tempSmoke.toFixed(1);
+        document.getElementById('tempProduct').textContent = data.tempProduct.toFixed(1);
+        document.getElementById('humidity').textContent = data.humidity.toFixed(0);
+
+        // Актюаторы
+        document.getElementById('heaterStatus').textContent = data.heaterOn ? 'Вкл' : 'Выкл';
+        document.getElementById('smokeStatus').textContent = `${data.smokePWM}%`;
+
+        // Программы
+        const programsList = document.getElementById('programsList');
+        let html = '';
+        for (const prog of data.programs) {
+          html += `
+            <div class="program-card">
+              <div><strong>${prog.name}</strong><br>
+                <small>${prog.steps.length} этапов</small>
+              </div>
+              <button onclick="startProgram('${prog.name}')">Запустить</button>
+            </div>
+          `;
+        }
+        programsList.innerHTML = html;
+      } catch (e) {
+        console.warn('Failed to fetch state:', e);
+      }
+    }
+
+    async function startProgram(name) {
+      try {
+        await fetch('/api/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ program: name })
+        });
+        alert('Программа запущена!');
+        fetchState();
+      } catch (e) {
+        alert('Ошибка запуска');
+      }
+    }
+
+    // Обновление каждые 2 секунды
+    setInterval(fetchState, 2000);
+    fetchState();
+  </script>
+</body>
+</html>

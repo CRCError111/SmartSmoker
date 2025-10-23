@@ -1,0 +1,215 @@
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --danger: #e74c3c;
+  --success: #2ecc71;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #212529;
+  --border: #dee2e6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.network-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--accent);
+  color: white;
+}
+
+.status-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.sensors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.sensor {
+  background: #f1f3f5;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.programs-title {
+  font-size: 20px;
+  margin: 24px 0 16px;
+  font-weight: 600;
+}
+
+.program-card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.program-card strong {
+  font-size: 16px;
+}
+
+.program-card small {
+  color: #6c757d;
+  display: block;
+  margin-top: 4px;
+}
+
+.program-card button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.program-card button:hover {
+  background: #2980b9;
+}
+
+.nav-icons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 12px;
+  width: 80px;
+}
+
+.nav-icon img {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  object-fit: contain;
+}
+
+/* Страница Wi-Fi */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-save {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-reset {
+  background: var(--danger);
+  color: white;
+  margin-top: 12px;
+}
+
+.status {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.status.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  .program-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-icons {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+}
