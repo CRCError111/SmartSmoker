@@ -9,59 +9,24 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <math.h>
-
 #include "Config.h"
 #include "ProgramTypes.h"
 #include "SystemState.h"
 #include "OLEDHandler.h"
 #include "ButtonHandler.h"
 
-// === Глобальные объекты ===
 AsyncWebServer server(80);
 OLEDHandler oled;
 ButtonHandler buttons;
-String requestBody; // Глобальный буфер для тела POST-запроса
 
-// === Реализация SystemState (синглтон) ===
+String requestBody;
+
+// === SystemState singleton ===
 SystemState& SystemState::getInstance() {
   static SystemState instance;
   return instance;
 }
-
 SystemState& systemState = SystemState::getInstance();
-
-// === Загрузка пользовательских программ ===
-std::vector<SmokingProgram> loadUserPrograms() {
-  std::vector<SmokingProgram> progs;
-  if (!LittleFS.exists("/programs")) LittleFS.mkdir("/programs");
-  File root = LittleFS.open("/programs");
-  File file = root.openNextFile();
-  while (file) {
-    if (String(file.name()).endsWith(".json")) {
-      StaticJsonDocument<1024> doc;
-      DeserializationError error = deserializeJson(doc, file);
-      if (!error && doc["name"].is<String>()) {
-        SmokingProgram prog;
-        prog.name = doc["name"].as<String>();
-        if (doc["steps"].is<JsonArray>()) {
-          for (JsonObject stepObj : doc["steps"].as<JsonArray>()) {
-            ProgramStep step;
-            step.targetTemp = stepObj["targetTemp"] | 30;
-            step.targetHumidity = stepObj["targetHumidity"] | 70;
-            step.durationMinutes = stepObj["durationMinutes"] | 60;
-            step.hysteresis = stepObj["hysteresis"] | 2;
-            step.waitForTemp = stepObj["waitForTemp"] | true;
-            step.compressorPWM = stepObj["compressorPWM"] | -1;
-            prog.steps.push_back(step);
-          }
-        }
-        progs.push_back(prog);
-      }
-    }
-    file = root.openNextFile();
-  }
-  return progs;
-}
 
 // === Датчики ===
 Adafruit_BME280 bme;
@@ -79,7 +44,7 @@ unsigned long lastHeaterToggle = 0;
 bool heaterState = false;
 int targetSmokePWM = 0;
 
-// === Вспомогательные функции ===
+// === Чтение NTC ===
 float readNTC(uint8_t pin) {
   adc1_config_width(ADC_WIDTH_BIT_12);
   adc1_channel_t channel;
@@ -110,6 +75,7 @@ float readNTC(uint8_t pin) {
   return T_celsius;
 }
 
+// === Управление ТЭН ===
 void updateHeater(float currentTemp, float targetTemp, int hysteresis = 2) {
   if (systemState.emergencyStop || currentTemp >= MAX_TEMP_LIMIT) {
     digitalWrite(PIN_HEATER_SSR, LOW);
@@ -138,6 +104,41 @@ void updateHeater(float currentTemp, float targetTemp, int hysteresis = 2) {
   systemState.heaterOn = heaterState;
 }
 
+// === Загрузка пользовательских программ ===
+std::vector<SmokingProgram> loadUserPrograms() {
+  std::vector<SmokingProgram> progs;
+  if (!LittleFS.exists("/programs")) LittleFS.mkdir("/programs");
+  File root = LittleFS.open("/programs");
+  File file = root.openNextFile();
+  while (file) {
+    if (String(file.name()).endsWith(".json")) {
+      StaticJsonDocument<1024> doc;
+      DeserializationError error = deserializeJson(doc, file);
+      if (!error && doc["name"].is<String>()) {
+        SmokingProgram prog;
+        prog.name = doc["name"].as<String>();
+        if (doc["steps"].is<JsonArray>()) {
+          for (JsonObject stepObj : doc["steps"].as<JsonArray>()) {
+            ProgramStep step;
+            step.targetTemp = stepObj["targetTemp"] | 30;
+            step.targetHumidity = stepObj["targetHumidity"] | 70;
+            step.durationMinutes = stepObj["durationMinutes"] | 60;
+            step.hysteresis = stepObj["hysteresis"] | 2;
+            step.waitForTemp = stepObj["waitForTemp"] | true;
+            step.waitForHumidity = stepObj["waitForHumidity"] | false; // ← новое
+            step.compressorPWM = stepObj["compressorPWM"] | -1;
+            step.fanPWM = stepObj["fanPWM"] | 50; // ← новое
+          }
+        }
+        progs.push_back(prog);
+      }
+    }
+    file = root.openNextFile();
+  }
+  return progs;
+}
+
+// === Сохранение программы ===
 bool saveProgramToFile(const SmokingProgram& prog) {
   if (prog.isBuiltIn) return false;
   String filename = "/programs/user_" + prog.name + ".json";
@@ -155,7 +156,9 @@ bool saveProgramToFile(const SmokingProgram& prog) {
     s["durationMinutes"] = step.durationMinutes;
     s["hysteresis"] = step.hysteresis;
     s["waitForTemp"] = step.waitForTemp;
+    s["waitForHumidity"] = step.waitForHumidity; // ← новое
     s["compressorPWM"] = step.compressorPWM;
+    s["fanPWM"] = step.fanPWM; // ← новое
   }
   serializeJson(doc, tmpFile);
   tmpFile.close();
@@ -163,6 +166,7 @@ bool saveProgramToFile(const SmokingProgram& prog) {
   return LittleFS.rename(filename + ".tmp", filename);
 }
 
+// === Настройка Wi-Fi ===
 void setupWiFi() {
   if (!LittleFS.begin(true)) {
     Serial.println("FATAL: LittleFS");
@@ -211,8 +215,10 @@ void setup() {
   Serial.begin(115200);
   pinMode(PIN_HEATER_SSR, OUTPUT);
   pinMode(PIN_SMOKE_MOSFET, OUTPUT);
+  pinMode(PIN_FAN_MIXER, OUTPUT); // ← новое
   digitalWrite(PIN_HEATER_SSR, LOW);
   analogWrite(PIN_SMOKE_MOSFET, 0);
+  analogWrite(PIN_FAN_MIXER, 0); // ← новое
 
   Wire.begin(I2C_SDA, I2C_SCL);
   if (!bme.begin(0x76, &Wire) && !bme.begin(0x77, &Wire)) {
@@ -230,7 +236,7 @@ void setup() {
   buttons.begin();
   oled.begin();
 
-  // ——— Web Server ———
+  // === Web Server ===
   server.on("/api/state", HTTP_GET, [](AsyncWebServerRequest *request) {
     StaticJsonDocument<2048> doc;
     doc["networkMode"] = (systemState.networkMode == SystemState::NetworkMode::STA) ? "STA" : "AP";
@@ -251,12 +257,10 @@ void setup() {
       char buf[10];
       snprintf(buf, sizeof(buf), "%02d:%02d", mins, secs);
       doc["stepTimeLeft"] = String(buf);
-      doc["waitingForTemp"] = systemState.waitingForTemp;
     } else {
       doc["currentProgramName"] = "";
       doc["currentStepIndex"] = -1;
       doc["stepTimeLeft"] = "00:00";
-      doc["waitingForTemp"] = false;
     }
 
     doc["tempChamber"] = systemState.tempChamber;
@@ -265,6 +269,8 @@ void setup() {
     doc["humidity"] = systemState.humidity;
     doc["heaterOn"] = systemState.heaterOn;
     doc["smokePWM"] = systemState.smokePWM;
+    doc["fanPWM"] = systemState.fanPWM; // ← новое
+    doc["fs_free"] = LittleFS.totalBytes() - LittleFS.usedBytes(); // ← новое
 
     JsonArray programs = doc.createNestedArray("programs");
     for (const auto& p : builtInPrograms) {
@@ -286,143 +292,103 @@ void setup() {
     request->send(200, "application/json", json);
   });
 
-  // === Сохранение Wi-Fi ===
-  server.on("/api/wifi", HTTP_POST,
-    [](AsyncWebServerRequest *request) {
-      StaticJsonDocument<300> doc;
-      DeserializationError error = deserializeJson(doc, requestBody);
-      requestBody = "";
+  // === Аварийная остановка ===
+  server.on("/api/stop", HTTP_POST, [](AsyncWebServerRequest *request) {
+    systemState.emergencyStop = true;
+    systemState.mode = SystemState::SystemMode::IDLE;
+    digitalWrite(PIN_HEATER_SSR, LOW);
+    analogWrite(PIN_SMOKE_MOSFET, 0);
+    analogWrite(PIN_FAN_MIXER, 0); // ← новое
+    request->send(200, "text/plain", "OK");
+  });
 
-      if (error || !doc["ssid"].is<String>() || !doc["pass"].is<String>()) {
-        return request->send(400, "text/plain", "Invalid JSON");
-      }
+  // === Обработчики POST с телом ===
+  auto onBody = [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    if (index == 0) requestBody = "";
+    requestBody += String((char*)data, len);
+  };
 
-      String ssid = doc["ssid"].as<String>();
-      String pass = doc["pass"].as<String>();
-      if (ssid.length() == 0 || pass.length() < 8) {
-        return request->send(400, "text/plain", "SSID or password too short");
-      }
-
-      File tmpFile = LittleFS.open("/wifi.json.tmp", "w");
-      if (!tmpFile) {
-        return request->send(500, "text/plain", "FS error");
-      }
-      serializeJson(doc, tmpFile);
-      tmpFile.close();
-
-      if (LittleFS.exists("/wifi.json")) LittleFS.remove("/wifi.json");
-      if (!LittleFS.rename("/wifi.json.tmp", "/wifi.json")) {
-        return request->send(500, "text/plain", "Rename failed");
-      }
-
-      request->send(200, "text/plain", "OK");
-      delay(1000);
-      ESP.restart();
-    },
-    nullptr,
-    [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-      if (index == 0) {
-        requestBody = "";
-      }
-      requestBody += String((char*)data, len);
+  server.on("/api/wifi", HTTP_POST, [](AsyncWebServerRequest *request) {
+    StaticJsonDocument<300> doc;
+    DeserializationError error = deserializeJson(doc, requestBody);
+    requestBody = "";
+    if (error || !doc["ssid"].is<String>() || !doc["pass"].is<String>()) {
+      return request->send(400, "text/plain", "Invalid JSON");
     }
-  );
-
-  // === Сохранение программы ===
-  server.on("/api/programs", HTTP_POST,
-    [](AsyncWebServerRequest *request) {
-      StaticJsonDocument<2048> doc;
-      DeserializationError error = deserializeJson(doc, requestBody);
-      requestBody = "";
-
-      if (error || !doc["program"]["name"].is<String>()) {
-        return request->send(400, "text/plain", "Invalid JSON");
-      }
-
-      SmokingProgram prog;
-      prog.name = doc["program"]["name"].as<String>();
-      if (doc["program"]["steps"].is<JsonArray>()) {
-        for (JsonObject stepObj : doc["program"]["steps"].as<JsonArray>()) {
-          ProgramStep step;
-          step.targetTemp = stepObj["targetTemp"] | 30;
-          step.targetHumidity = stepObj["targetHumidity"] | 70;
-          step.durationMinutes = stepObj["durationMinutes"] | 60;
-          step.hysteresis = stepObj["hysteresis"] | 2;
-          step.waitForTemp = stepObj["waitForTemp"] | true;
-          step.compressorPWM = stepObj["compressorPWM"] | -1;
-          prog.steps.push_back(step);
-        }
-      }
-
-      if (prog.steps.empty()) {
-        return request->send(400, "text/plain", "No steps");
-      }
-
-      String oldName = doc["oldName"] | "";
-      if (!oldName.isEmpty() && oldName != prog.name) {
-        String oldPath = "/programs/user_" + oldName + ".json";
-        oldPath.replace(" ", "_");
-        if (LittleFS.exists(oldPath)) LittleFS.remove(oldPath);
-      }
-
-      if (saveProgramToFile(prog)) {
-        request->send(200, "text/plain", "OK");
-      } else {
-        request->send(500, "text/plain", "Save failed");
-      }
-    },
-    nullptr,
-    [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-      if (index == 0) {
-        requestBody = "";
-      }
-      requestBody += String((char*)data, len);
+    String ssid = doc["ssid"].as<String>();
+    String pass = doc["pass"].as<String>();
+    if (ssid.length() == 0 || pass.length() < 8) {
+      return request->send(400, "text/plain", "Too short");
     }
-  );
+    File tmpFile = LittleFS.open("/wifi.json.tmp", "w");
+    if (!tmpFile) return request->send(500, "text/plain", "FS error");
+    serializeJson(doc, tmpFile);
+    tmpFile.close();
+    if (LittleFS.exists("/wifi.json")) LittleFS.remove("/wifi.json");
+    if (!LittleFS.rename("/wifi.json.tmp", "/wifi.json")) return request->send(500, "text/plain", "Rename failed");
+    request->send(200, "text/plain", "OK");
+    delay(1000);
+    ESP.restart();
+  }, nullptr, onBody);
 
-  // === Запуск программы ===
-  server.on("/api/start", HTTP_POST,
-    [](AsyncWebServerRequest *request) {
-      StaticJsonDocument<200> doc;
-      DeserializationError error = deserializeJson(doc, requestBody);
-      requestBody = "";
-
-      if (error || !doc["program"].is<String>()) {
-        return request->send(400, "text/plain", "Invalid JSON");
+  server.on("/api/programs", HTTP_POST, [](AsyncWebServerRequest *request) {
+    StaticJsonDocument<2048> doc;
+    DeserializationError error = deserializeJson(doc, requestBody);
+    requestBody = "";
+    if (error || !doc["program"]["name"].is<String>()) return request->send(400, "text/plain", "Invalid JSON");
+    SmokingProgram prog;
+    prog.name = doc["program"]["name"].as<String>();
+    if (doc["program"]["steps"].is<JsonArray>()) {
+      for (JsonObject stepObj : doc["program"]["steps"].as<JsonArray>()) {
+        ProgramStep step;
+        step.targetTemp = stepObj["targetTemp"] | 30;
+        step.targetHumidity = stepObj["targetHumidity"] | 70;
+        step.durationMinutes = stepObj["durationMinutes"] | 60;
+        step.hysteresis = stepObj["hysteresis"] | 2;
+        step.waitForTemp = stepObj["waitForTemp"] | true;
+        step.waitForHumidity = stepObj["waitForHumidity"] | false;
+        step.compressorPWM = stepObj["compressorPWM"] | -1;
+        step.fanPWM = stepObj["fanPWM"] | 50;
+        prog.steps.push_back(step);
       }
+    }
+    if (prog.steps.empty()) return request->send(400, "text/plain", "No steps");
+    String oldName = doc["oldName"] | "";
+    if (!oldName.isEmpty() && oldName != prog.name) {
+      String oldPath = "/programs/user_" + oldName + ".json";
+      oldPath.replace(" ", "_");
+      if (LittleFS.exists(oldPath)) LittleFS.remove(oldPath);
+    }
+    if (saveProgramToFile(prog)) request->send(200, "text/plain", "OK");
+    else request->send(500, "text/plain", "Save failed");
+  }, nullptr, onBody);
 
-      String progName = doc["program"].as<String>();
-      std::unique_ptr<SmokingProgram> selected = nullptr;
-      for (const auto& p : builtInPrograms) {
+  server.on("/api/start", HTTP_POST, [](AsyncWebServerRequest *request) {
+    StaticJsonDocument<200> doc;
+    DeserializationError error = deserializeJson(doc, requestBody);
+    requestBody = "";
+    if (error || !doc["program"].is<String>()) return request->send(400, "text/plain", "Invalid JSON");
+    String progName = doc["program"].as<String>();
+    std::unique_ptr<SmokingProgram> selected = nullptr;
+    for (const auto& p : builtInPrograms) {
+      if (p.name == progName) { selected = std::make_unique<SmokingProgram>(p); break; }
+    }
+    if (!selected) {
+      auto userProgs = loadUserPrograms();
+      for (const auto& p : userProgs) {
         if (p.name == progName) { selected = std::make_unique<SmokingProgram>(p); break; }
       }
-      if (!selected) {
-        auto userProgs = loadUserPrograms();
-        for (const auto& p : userProgs) {
-          if (p.name == progName) { selected = std::make_unique<SmokingProgram>(p); break; }
-        }
-      }
-      if (!selected) return request->send(404, "text/plain", "Not found");
-
-      systemState.mode = SystemState::SystemMode::RUNNING;
-      systemState.currentProgram = std::move(selected);
-      systemState.currentStepIndex = 0;
-      systemState.programStartTime = millis();
-      systemState.stepStartTime = 0;
-      systemState.waitingForTemp = false;
-      systemState.emergencyStop = false;
-      request->send(200, "application/json", "{\"status\":\"started\"}");
-    },
-    nullptr,
-    [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-      if (index == 0) {
-        requestBody = "";
-      }
-      requestBody += String((char*)data, len);
     }
-  );
+    if (!selected) return request->send(404, "text/plain", "Not found");
+    systemState.mode = SystemState::SystemMode::RUNNING;
+    systemState.currentProgram = std::move(selected);
+    systemState.currentStepIndex = 0;
+    systemState.stepStartTime = 0;
+    systemState.emergencyStop = false;
+    request->send(200, "application/json", "{\"status\":\"started\"}");
+  }, nullptr, onBody);
 
-  // === Получение списка программ ===
+  // === Остальные обработчики ===
   server.on("/api/programs", HTTP_GET, [](AsyncWebServerRequest *request) {
     StaticJsonDocument<2048> doc;
     JsonArray progs = doc.createNestedArray("programs");
@@ -444,7 +410,6 @@ void setup() {
     request->send(200, "application/json", json);
   });
 
-  // === Удаление программы ===
   server.on("/api/programs/:name", HTTP_DELETE, [](AsyncWebServerRequest *request) {
     String name = request->pathArg(0);
     String path = "/programs/user_" + name + ".json";
@@ -457,7 +422,6 @@ void setup() {
     }
   });
 
-  // === Сброс Wi-Fi ===
   server.on("/api/wifi/reset", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (LittleFS.exists("/wifi.json")) LittleFS.remove("/wifi.json");
     request->send(200, "text/plain", "OK");
@@ -499,10 +463,11 @@ void loop() {
       systemState.currentProgram.reset();
       digitalWrite(PIN_HEATER_SSR, LOW);
       analogWrite(PIN_SMOKE_MOSFET, 0);
+      analogWrite(PIN_FAN_MIXER, 0); // ← новое
     } else {
       const ProgramStep& step = systemState.currentProgram->steps[systemState.currentStepIndex];
-      targetSmokePWM = (step.compressorPWM == -1) ? 70 : step.compressorPWM;
-
+      
+      // Управление ТЭН
       bool skipHeating = false;
       if (!systemState.waitingForTemp && step.waitForTemp) {
         if (systemState.tempChamber >= (step.targetTemp - step.hysteresis)) {
@@ -515,10 +480,21 @@ void loop() {
         }
       }
 
+      // Управление дымом и вентилятором
+      targetSmokePWM = (step.compressorPWM == -1) ? 70 : step.compressorPWM;
+      int fanPWM = step.fanPWM; // ← новое
+      analogWrite(PIN_FAN_MIXER, (fanPWM * 255) / 100); // ← новое
+      systemState.fanPWM = fanPWM; // ← новое
+
       if (!skipHeating) {
         updateHeater(systemState.tempChamber, step.targetTemp, step.hysteresis);
         unsigned long elapsed = millis() - systemState.stepStartTime;
-        if (elapsed >= (step.durationMinutes * 60000UL)) {
+        
+        // Завершение по времени ИЛИ по влажности
+        bool timeElapsed = (elapsed >= (step.durationMinutes * 60000UL));
+        bool humidityReached = (!step.waitForHumidity) || (systemState.humidity <= step.targetHumidity);
+        
+        if (timeElapsed || humidityReached) {
           systemState.currentStepIndex++;
           systemState.stepStartTime = 0;
           systemState.waitingForTemp = false;
@@ -526,13 +502,12 @@ void loop() {
       }
     }
   }
-  analogWrite(PIN_SMOKE_MOSFET, (targetSmokePWM * 255) / 100);
 
+  analogWrite(PIN_SMOKE_MOSFET, (targetSmokePWM * 255) / 100);
   ButtonHandler::Event evt = buttons.readEvent();
   if (evt != ButtonHandler::Event::NONE) {
     oled.handleButtonEvent(static_cast<int>(evt));
   }
   oled.update();
-
   delay(10);
 }

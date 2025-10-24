@@ -28,21 +28,16 @@ public:
 
   bool heaterOn = false;
   int smokePWM = 0;
+  int fanPWM = 0; // ← новое
 
 private:
   SystemState() = default;
 };
 
-// // === Реализация синглтона ===
-// inline SystemState& SystemState::getInstance() {
-//   static SystemState instance;
-//   return instance;
-// }
-
-// === Встроенные программы — inline, чтобы избежать ошибок линковки ===
+// SystemState.h — в самом конце файла
 inline const std::vector<SmokingProgram> builtInPrograms = {
-  {"Рыба холодное копчение", {{25, 70, 240, 2, true, -1}, {30, 65, 360, 2, true, -1}}, true},
-  {"Рыба горячее копчение", {{50, 60, 30, 2, true, -1}, {70, 50, 60, 2, true, -1}}, true},
-  {"Мясо холодное копчение", {{22, 75, 480, 2, true, -1}, {28, 70, 720, 2, true, -1}}, true},
-  {"Мясо горячее копчение", {{45, 60, 20, 2, true, -1}, {65, 50, 90, 2, true, -1}}, true}
+  {"Рыба холодное копчение", {{25, 70, 240, 2, true, false, -1, 50}, {30, 65, 360, 2, true, false, -1, 50}}, true},
+  {"Рыба горячее копчение", {{50, 60, 30, 2, true, false, -1, 50}, {70, 50, 60, 2, true, false, -1, 50}}, true},
+  {"Мясо холодное копчение", {{22, 75, 480, 2, true, false, -1, 50}, {28, 70, 720, 2, true, false, -1, 50}}, true},
+  {"Мясо горячее копчение", {{45, 60, 20, 2, true, false, -1, 50}, {65, 50, 90, 2, true, false, -1, 50}}, true}
 };

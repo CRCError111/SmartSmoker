@@ -2,7 +2,6 @@
 #include "Config.h"
 #include "SystemState.h"
 
-// === Внешние ссылки ===
 extern std::vector<SmokingProgram> loadUserPrograms();
 extern SystemState& systemState;
 
@@ -60,22 +59,26 @@ void OLEDHandler::drawMain() {
   if (systemState.networkMode == SystemState::NetworkMode::STA) {
     u8g2.setCursor(0, 0);
     u8g2.printf("STA:%s", systemState.ssid.c_str());
+    u8g2.setCursor(0, 10);
+    u8g2.printf("IP:%s", systemState.ip.c_str()); // ← IP
   } else {
     u8g2.setCursor(0, 0);
     u8g2.printf("AP:%s", systemState.ssid.c_str());
   }
 
-  u8g2.setCursor(0, 16);
+  u8g2.setCursor(0, 22);
   u8g2.printf("T:%.0f/%.0f/%.0f", systemState.tempChamber, systemState.tempSmoke, systemState.tempProduct);
-  u8g2.setCursor(0, 28);
+  u8g2.setCursor(0, 34);
   u8g2.printf("H:%.0f%%", systemState.humidity);
-  u8g2.setCursor(0, 40);
+  u8g2.setCursor(0, 46);
   u8g2.printf("TEN:%s DYM:%d%%", systemState.heaterOn ? "ON" : "OFF", systemState.smokePWM);
+  u8g2.setCursor(0, 58);
+  u8g2.printf("FAN:%d%%", systemState.fanPWM); // ← вентилятор
 
-  u8g2.setCursor(0, 52);
+  u8g2.setCursor(0, 70);
   if (systemState.mode == SystemState::SystemMode::RUNNING && systemState.currentProgram) {
     u8g2.printf("> %s", systemState.currentProgram->name.c_str());
-    u8g2.setCursor(0, 64);
+    u8g2.setCursor(0, 82);
     u8g2.printf("Этап %d", (int)systemState.currentStepIndex + 1);
   } else {
     u8g2.print("OK - программы");
@@ -110,6 +113,7 @@ void OLEDHandler::handleButtonEvent(int event) {
       systemState.mode = SystemState::SystemMode::IDLE;
       digitalWrite(PIN_HEATER_SSR, LOW);
       analogWrite(PIN_SMOKE_MOSFET, 0);
+      analogWrite(PIN_FAN_MIXER, 0); // ← новое
       currentScreen = UIScreen::MAIN;
     } else if (event == 3) {
       currentScreen = UIScreen::MAIN;
@@ -123,9 +127,7 @@ void OLEDHandler::handleButtonEvent(int event) {
         systemState.mode = SystemState::SystemMode::RUNNING;
         systemState.currentProgram = std::make_unique<SmokingProgram>(*availablePrograms[selectedProgramIndex]);
         systemState.currentStepIndex = 0;
-        systemState.programStartTime = millis();
         systemState.stepStartTime = 0;
-        systemState.waitingForTemp = false;
         systemState.emergencyStop = false;
       }
       currentScreen = UIScreen::MAIN;
