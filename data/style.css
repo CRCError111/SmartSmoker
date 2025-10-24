@@ -1,19 +1,19 @@
 :root {
-  --primary: #2c3e50;
-  --accent: #3498db;
-  --danger: #e74c3c;
-  --success: #2ecc71;
-  --bg: #f8f9fa;
-  --card: #ffffff;
-  --text: #212529;
-  --border: #dee2e6;
+  --primary: #2563EB;
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --bg: #F9FAFB;
+  --card: #FFFFFF;
+  --text: #111827;
+  --border: #E5E7EB;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
@@ -34,19 +34,12 @@ body {
 }
 
 .header h1 {
-  font-size: 24px;
-  margin-bottom: 12px;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .network-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  background: var(--accent);
+  background: var(--primary);
   color: white;
 }
 
@@ -58,6 +51,12 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+.memory-info {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #6B7280;
+}
+
 .sensors-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -66,7 +65,7 @@ body {
 }
 
 .sensor {
-  background: #f1f3f5;
+  background: #F1F3F5;
   padding: 12px;
   border-radius: 10px;
   text-align: center;
@@ -97,13 +96,13 @@ body {
 }
 
 .program-card small {
-  color: #6c757d;
+  color: #6B7280;
   display: block;
   margin-top: 4px;
 }
 
 .program-card button {
-  background: var(--accent);
+  background: var(--primary);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -115,7 +114,23 @@ body {
 }
 
 .program-card button:hover {
-  background: #2980b9;
+  background: #1D4ED8;
+}
+
+.emergency-stop {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 .nav-icons {
@@ -141,75 +156,4 @@ body {
   height: 56px;
   margin-bottom: 8px;
   object-fit: contain;
-}
-
-/* Страница Wi-Fi */
-.form-group {
-  margin-bottom: 18px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 16px;
-}
-
-.btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-save {
-  background: var(--accent);
-  color: white;
-}
-
-.btn-reset {
-  background: var(--danger);
-  color: white;
-  margin-top: 12px;
-}
-
-.status {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 6px;
-  text-align: center;
-  font-weight: 500;
-}
-
-.status.success {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status.error {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-/* Адаптивность */
-@media (max-width: 600px) {
-  .program-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nav-icons {
-    flex-wrap: wrap;
-    gap: 20px;
-  }
 }
