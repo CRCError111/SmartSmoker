@@ -1,0 +1,358 @@
+/* PWA Styles for Smart Smoker */
+/* Version 2.0.0 */
+
+/* Кнопка установки приложения */
+#pwa-install-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+  z-index: 9999;
+  transition: all 0.3s ease;
+  animation: pulse-install 2s ease-in-out infinite;
+}
+
+#pwa-install-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
+}
+
+#pwa-install-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes pulse-install {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(255, 107, 53, 0.6);
+  }
+}
+
+/* Уведомление об обновлении */
+.pwa-update-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.pwa-update-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+}
+
+.pwa-update-content span {
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pwa-update-btn {
+  padding: 8px 20px;
+  background: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pwa-update-btn:hover {
+  background: #f7931e;
+  transform: scale(1.05);
+}
+
+.pwa-dismiss-btn {
+  padding: 5px 10px;
+  background: transparent;
+  color: #999;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.pwa-dismiss-btn:hover {
+  color: #333;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Статус подключения */
+.connection-status {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 10000;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.connection-status.online {
+  background: #4caf50;
+  color: white;
+}
+
+.connection-status.offline {
+  background: #f44336;
+  color: white;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Splash screen для iOS */
+@media (display-mode: standalone) {
+  body {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  #pwa-install-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .pwa-update-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .pwa-update-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .pwa-update-content span {
+    font-size: 13px;
+  }
+}
+
+/* Стили для standalone режима (когда установлено как приложение) */
+@media (display-mode: standalone) {
+  /* Скрываем кнопку установки */
+  #pwa-install-btn {
+    display: none !important;
+  }
+
+  /* Добавляем отступ сверху для iOS */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Индикатор что это PWA */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff6b35 0%, #f7931e 100%);
+    z-index: 9999;
+  }
+}
+
+/* Анимация загрузки для PWA */
+.pwa-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #1a1a2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: fadeOut 0.5s ease-out 1s forwards;
+}
+
+.pwa-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 107, 53, 0.2);
+  border-top-color: #ff6b35;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Кнопка запроса уведомлений */
+.notification-prompt {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: white;
+  border-radius: 15px;
+  padding: 15px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 9998;
+  max-width: 300px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-prompt h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.notification-prompt p {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.notification-prompt-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.notification-prompt-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notification-prompt-buttons .allow {
+  background: #ff6b35;
+  color: white;
+}
+
+.notification-prompt-buttons .allow:hover {
+  background: #f7931e;
+}
+
+.notification-prompt-buttons .deny {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.notification-prompt-buttons .deny:hover {
+  background: #e0e0e0;
+}
+
+/* Бейдж "Установлено" */
+.pwa-installed-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+/* Адаптация для планшетов */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #pwa-install-btn {
+    bottom: 30px;
+    right: 30px;
+  }
+
+  .pwa-update-notification {
+    top: 30px;
+    right: 30px;
+  }
+}
+
+/* Темная тема для PWA */
+@media (prefers-color-scheme: dark) {
+  .pwa-update-notification {
+    background: #2d2d2d;
+  }
+
+  .pwa-update-content span {
+    color: #fff;
+  }
+
+  .notification-prompt {
+    background: #2d2d2d;
+  }
+
+  .notification-prompt h4 {
+    color: #fff;
+  }
+
+  .notification-prompt p {
+    color: #ccc;
+  }
+
+  .notification-prompt-buttons .deny {
+    background: #3d3d3d;
+    color: #ccc;
+  }
+
+  .notification-prompt-buttons .deny:hover {
+    background: #4d4d4d;
+  }
+}

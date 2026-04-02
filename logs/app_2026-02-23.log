@@ -1,0 +1,35 @@
+[2026-02-23 12:26:49] [ERROR] [CLI] [api/send-program.php] [PHP] PHP Error [ERROR]: Undefined array key "REQUEST_METHOD" in D:\Arduino\Kiro\WorkSmartSmoker\api\send-program.php on line 36 | Context: 
+[2026-02-23 12:26:49] [CRITICAL] [CLI] [CLI] Fatal Error: Uncaught Error: Undefined constant PDO::MYSQL_ATTR_INIT_COMMAND in D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php:80
+Stack trace:
+#0 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(33): Database->connect()
+#1 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(55): Database->__construct()
+#2 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(307): Database::getInstance()
+#3 D:\Arduino\Kiro\WorkSmartSmoker\includes\logger.php(200): db()
+#4 D:\Arduino\Kiro\WorkSmartSmoker\includes\logger.php(116): Logger->logToDatabase('ERROR', '[PHP] PHP Error...', '')
+#5 D:\Arduino\Kiro\WorkSmartSmoker\includes\logger.php(342): Logger->log('ERROR', '[PHP] PHP Error...')
+#6 D:\Arduino\Kiro\WorkSmartSmoker\includes\logger.php(434): logMessage('ERROR', 'PHP Error [ERRO...', 'PHP')
+#7 D:\Arduino\Kiro\WorkSmartSmoker\api\send-program.php(36): errorHandler(2, 'Undefined array...', 'D:\\Arduino\\Kiro...', 36)
+#8 {main}
+  thrown in D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php on line 80
+[2026-02-23 14:59:04] [CRITICAL] [CLI] [CLI] Fatal Error: Uncaught Error: Call to undefined function getDB() in D:\Arduino\Kiro\WorkSmartSmoker\test-program-size.php:18
+Stack trace:
+#0 {main}
+  thrown in D:\Arduino\Kiro\WorkSmartSmoker\test-program-size.php on line 18
+[2026-02-23 15:02:25] [CRITICAL] [CLI] [CLI] Fatal Error: Uncaught Error: Undefined constant PDO::MYSQL_ATTR_INIT_COMMAND in D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php:80
+Stack trace:
+#0 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(33): Database->connect()
+#1 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(55): Database->__construct()
+#2 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(307): Database::getInstance()
+#3 D:\Arduino\Kiro\WorkSmartSmoker\test-program-size.php(18): db()
+#4 {main}
+  thrown in D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php on line 80
+[2026-02-23 16:41:28] [CRITICAL] [CLI] [CLI] Fatal Error: Uncaught Error: Undefined constant PDO::MYSQL_ATTR_INIT_COMMAND in D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php:80
+Stack trace:
+#0 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(33): Database->connect()
+#1 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(55): Database->__construct()
+#2 D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php(307): Database::getInstance()
+#3 D:\Arduino\Kiro\WorkSmartSmoker\tests\device-binding-pull-model\test-binding-processor.php(104): db()
+#4 D:\Arduino\Kiro\WorkSmartSmoker\tests\device-binding-pull-model\test-binding-processor.php(32): {closure:D:\Arduino\Kiro\WorkSmartSmoker\tests\device-binding-pull-model\test-binding-processor.php:103}()
+#5 D:\Arduino\Kiro\WorkSmartSmoker\tests\device-binding-pull-model\test-binding-processor.php(103): runTest('Process new dev...', Object(Closure))
+#6 {main}
+  thrown in D:\Arduino\Kiro\WorkSmartSmoker\includes\db.php on line 80

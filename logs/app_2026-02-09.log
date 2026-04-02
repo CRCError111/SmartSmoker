@@ -1,0 +1,50 @@
+[2026-02-09 06:46:43] [INFO] [94.51.6.115] [/login.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 06:46:43] [INFO] [94.51.6.115] [/login.php] [AUTH] Успешный вход пользователя: crcerror11@gmail.com (IP: 94.51.6.115) | Context: 
+[2026-02-09 06:46:43] [INFO] [94.51.6.115] [/program-edit.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 06:46:43] [INFO] [94.51.6.115] [/programs.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 06:50:51] [INFO] [94.51.6.115] [/programs.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 07:58:03] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 07:58:03] [ERROR] [94.51.6.115] [/api-diagnostic.php] [PHP] PHP Error [ERROR]: Constant SMART_SMOKER already defined in /var/www/u3385152/data/www/crcerror.ru/api-diagnostic.php on line 119 | Context: 
+[2026-02-09 07:58:03] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 07:58:22] [INFO] [94.51.6.115] [/dashboard.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 07:58:31] [INFO] [94.51.6.115] [/add-device.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 07:58:31] [INFO] [94.51.6.115] [/add-device.php] [DEVICES] Устройство #1 создано: 111 | Context: 
+[2026-02-09 07:58:31] [INFO] [94.51.6.115] [/bind-device.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 07:58:47] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 07:58:47] [ERROR] [94.51.6.115] [/api-diagnostic.php] [PHP] PHP Error [ERROR]: Constant SMART_SMOKER already defined in /var/www/u3385152/data/www/crcerror.ru/api-diagnostic.php on line 119 | Context: 
+[2026-02-09 07:58:47] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 09:46:33] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 09:46:33] [ERROR] [94.51.6.115] [/api-diagnostic.php] [PHP] PHP Error [ERROR]: Constant SMART_SMOKER already defined in /var/www/u3385152/data/www/crcerror.ru/api-diagnostic.php on line 119 | Context: 
+[2026-02-09 09:46:33] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 11:17:19] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:17:19] [ERROR] [94.51.6.115] [/api-diagnostic.php] [PHP] PHP Error [ERROR]: Constant SMART_SMOKER already defined in /var/www/u3385152/data/www/crcerror.ru/api-diagnostic.php on line 119 | Context: 
+[2026-02-09 11:17:20] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 11:17:32] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:17:32] [ERROR] [94.51.6.115] [/api-diagnostic.php] [PHP] PHP Error [ERROR]: Constant SMART_SMOKER already defined in /var/www/u3385152/data/www/crcerror.ru/api-diagnostic.php on line 119 | Context: 
+[2026-02-09 11:17:32] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 11:25:40] [INFO] [94.51.6.115] [/login.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:25:40] [INFO] [94.51.6.115] [/login.php] [AUTH] Успешный вход пользователя: crcerror11@gmail.com (IP: 94.51.6.115) | Context: 
+[2026-02-09 11:25:40] [INFO] [94.51.6.115] [/bind-device.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:25:45] [INFO] [94.51.6.115] [/devices.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:25:51] [INFO] [94.51.6.115] [/edit-device.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:25:55] [INFO] [94.51.6.115] [/devices.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:25:57] [INFO] [94.51.6.115] [/view-device.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:26:23] [INFO] [94.51.6.115] [/devices.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:36:54] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:36:54] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 11:47:20] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 11:47:20] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 12:18:15] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 12:18:15] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 12:18:20] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 12:18:20] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 12:18:38] [INFO] [94.51.6.115] [/devices.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 12:18:39] [INFO] [94.51.6.115] [/dashboard.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 12:18:47] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 12:18:48] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 13:32:27] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 13:32:27] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
+[2026-02-09 13:32:33] [INFO] [94.51.6.115] [/dashboard.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 13:32:45] [INFO] [94.51.6.115] [/dashboard.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 13:33:14] [INFO] [94.51.6.115] [/api-diagnostic.php] [DATABASE] Database connection established | Context: 
+[2026-02-09 13:33:14] [INFO] [94.51.6.115] [/api-diagnostic.php] [DIAGNOSTIC] Запущена диагностика всех эндпоинтов API | Context: 
